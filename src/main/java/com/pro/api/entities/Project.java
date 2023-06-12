@@ -53,7 +53,7 @@ public class Project
 	
 	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
-	private Date endDate;
+	private Date endDate;	
 	
 	@ManyToOne
 	@JsonBackReference

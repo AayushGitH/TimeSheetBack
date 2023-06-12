@@ -1,5 +1,9 @@
 package com.pro.api.controller;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +19,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pro.api.entities.Employee;
 import com.pro.api.model.AuthRequest;
 import com.pro.api.repo.EmployeeRepo;
+import com.pro.api.repo.HolidayRepo;
 import com.pro.api.service.EmployeeService;
 import com.pro.api.service.JwtService;
 
@@ -36,6 +42,9 @@ public class HomeController
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private HolidayRepo holidayRepo;
 	
 	@Autowired
 	private JwtService jwtService;
@@ -56,12 +65,12 @@ public class HomeController
 	{
 		employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 		employee.setStatus("Active");
-		employee.setRole("ROLE_USER");
+		employee.setRole("ROLE_ADMIN");
 		System.out.println(employee);
 		try 
 		{
 			return ResponseEntity.status(HttpStatus.CREATED).body(this.employeeService.createEmployee(employee));
-			// return ResponseEntity.status(HttpStatus.CREATED).body(employee);
+//			 return ResponseEntity.status(HttpStatus.CREATED).body(employee);
 		} 
 		catch (Exception e) 
 		{
@@ -75,7 +84,7 @@ public class HomeController
 		employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 		System.out.println(key);
 		employee.setStatus("Active");
-		employee.setRole("ROLE_USER");
+		employee.setRole("ROLE_ADMIN");
 		System.out.println(employee);
 		try 
 		{
@@ -105,13 +114,20 @@ public class HomeController
 	
 	// ------------------------------------------------------| Gives logged in user details |------------------------------------------------------
 	@PostMapping("/details")
-	public ResponseEntity<?> demo(@RequestBody String token)
+	public ResponseEntity<?> details(@RequestBody String token)
 	{
-		System.out.println(token);
 		String email = this.jwtService.extractUsername(token);
-		System.out.println(email);
 		Employee user = this.employeeRepo.findByemail(email);
-		System.out.println(user);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body(user);
 	}
+	
+	// ------------------------------------------------------| Returns true when there is holiday |------------------------------------------------------
+	@GetMapping("/check/{date}")
+	public ResponseEntity<?> checkonly(@PathVariable("date") String date) throws ParseException
+	{
+		Date udate = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+		boolean existsByDate = this.holidayRepo.existsByDate(udate);
+		return ResponseEntity.status(HttpStatus.OK).body(existsByDate);
+	}
+	
 }

@@ -40,8 +40,6 @@ public class EmployeeController {
 	@Autowired
 	private TimeSheetService timeSheetService;
 	
-	@Autowired
-	private JwtService jwtService;
 	
 	// ------------------------------------------------------| Demo |------------------------------------------------------
 	@GetMapping("/home")
@@ -50,13 +48,10 @@ public class EmployeeController {
 	}
 
 	// ------------------------------------------------------| Add TimeSheet |------------------------------------------------------
-	@PostMapping("/addTimeSheet/{token}")
-	public ResponseEntity<?> addTimeSheet(@RequestBody TimeSheet timeSheet,@PathVariable("token") String token)
+	@PostMapping("/addTimeSheet")
+	public ResponseEntity<?> addTimeSheet(@RequestBody TimeSheet timeSheet)
 	{
 		try {
-			String email = this.jwtService.extractUsername(token);
-			Employee employee = this.employeeService.readEmployeeByEmail(email);
-			timeSheet.setEmployee(employee);
 			return ResponseEntity.status(HttpStatus.CREATED).body(this.timeSheetService.addTimeSheet(timeSheet));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong !!!!!!!!");	
@@ -67,12 +62,22 @@ public class EmployeeController {
 	@PatchMapping("/updateTimeSheet")
 	public ResponseEntity<?> updateTimeSheet(@RequestBody TimeSheet timeSheet) {
 		try {
-			TimeSheet utimeSheet = this.timeSheetService.readTimeSheetById(timeSheet.getTimesheetId());
-			timeSheet.setEmployee(utimeSheet.getEmployee());
 			return ResponseEntity.status(HttpStatus.OK).body(this.timeSheetService.updateTimeSheet(timeSheet));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Something went wrong in server side !!!!!");
 		}
 	}
+	
+	// ------------------------------------------------------| View TimeSheets |------------------------------------------------------
+	@GetMapping("/readTimeSheets")
+	public ResponseEntity<?> readTimeSheets() {
+		try {
+			return ResponseEntity.status(HttpStatus.OK).body(this.timeSheetService.readTimeSheet());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Something went wrong in server side !!!!!");
+		}
+	}
+	
 }

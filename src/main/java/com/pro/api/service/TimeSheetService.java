@@ -10,7 +10,7 @@ public interface TimeSheetService
 	TimeSheet addTimeSheet(TimeSheet timeSheet);
 	
 	// Read
-	List<TimeSheet> readTimeSheet(int empId);
+	List<TimeSheet> readTimeSheet();
 	TimeSheet readTimeSheetById(int timeSheetId);
 	
 	// Update 

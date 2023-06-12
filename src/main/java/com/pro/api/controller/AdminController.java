@@ -17,12 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pro.api.entities.Client;
 import com.pro.api.entities.Employee;
+import com.pro.api.entities.Holiday;
 import com.pro.api.entities.Project;
 import com.pro.api.model.AssignClient;
 import com.pro.api.model.AssignProject;
 import com.pro.api.service.ClientService;
 import com.pro.api.service.EmployeeService;
+import com.pro.api.service.HolidayService;
 import com.pro.api.service.ProjectService;
+
+import jakarta.validation.Valid;
 
 @CrossOrigin
 @RestController
@@ -37,6 +41,9 @@ public class AdminController {
 	
 	@Autowired
 	private ClientService clientService;
+	
+	@Autowired
+	private HolidayService holidayService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -50,7 +57,7 @@ public class AdminController {
 
 	// ------------------------------------------------------| Add employee as a User |------------------------------------------------------
 	@PostMapping("/addEmployee")
-	public ResponseEntity<?> addEmployee(@RequestBody Employee employee) {
+	public ResponseEntity<?> addEmployee(@Valid @RequestBody Employee employee) {
 		employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 		employee.setRole("ROLE_USER");
 		try {
@@ -187,4 +194,38 @@ public class AdminController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Enter proper informations");
 		}
 	}
+	
+	// ------------------------------------------------------| Add a holiday |------------------------------------------------------
+	@PostMapping("/addHoliday")
+	public ResponseEntity<?> addHoliday(@RequestBody Holiday holiday) {
+		try {
+			return ResponseEntity.status(HttpStatus.CREATED).body(this.holidayService.addHoliday(holiday));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Something went wrong in the server !!");
+		}
+	}
+	
+	// ------------------------------------------------------| Update a holiday |------------------------------------------------------
+	@PatchMapping("/updateHoliday")
+	public ResponseEntity<?> updateHoliday(@RequestBody Holiday holiday) {
+		try {
+			return ResponseEntity.status(HttpStatus.OK).body(this.holidayService.updateHoliday(holiday));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(e.getMessage());
+		}
+	}
+	
+	// ------------------------------------------------------| Read all holidays |------------------------------------------------------
+	@GetMapping("/readAllHolidays")
+	public ResponseEntity<?> readAllHolidays() {
+		try {
+			return ResponseEntity.status(HttpStatus.OK).body(this.holidayService.readAllHolidays());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Something went wrong in server side !!!!!");
+		}
+	}
+	
 }
