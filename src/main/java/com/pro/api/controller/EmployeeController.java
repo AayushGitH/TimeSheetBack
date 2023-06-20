@@ -22,62 +22,80 @@ import com.pro.api.entities.Employee;
 import com.pro.api.entities.Project;
 import com.pro.api.entities.TimeSheet;
 import com.pro.api.model.AssignProject;
+import com.pro.api.repo.HolidayRepo;
+import com.pro.api.repo.TimeSheetRepo;
 import com.pro.api.service.ClientService;
 import com.pro.api.service.EmployeeService;
+import com.pro.api.service.HolidayService;
 import com.pro.api.service.JwtService;
 import com.pro.api.service.ProjectService;
 import com.pro.api.service.TimeSheetService;
 
+import jakarta.validation.Valid;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/employee")
-@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_USER')")
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class EmployeeController {
 	
 	@Autowired
 	private EmployeeService employeeService;
-	
+
 	@Autowired
-	private TimeSheetService timeSheetService;
+	private PasswordEncoder passwordEncoder;
 	
-	
-	// ------------------------------------------------------| Demo |------------------------------------------------------
-	@GetMapping("/home")
-	public String welcome() {
-		return "Hello after the successfull login";
+	@GetMapping("/first")
+	public String index()
+	{
+		return "First page adsf;afj;a";
 	}
 
-	// ------------------------------------------------------| Add TimeSheet |------------------------------------------------------
-	@PostMapping("/addTimeSheet")
-	public ResponseEntity<?> addTimeSheet(@RequestBody TimeSheet timeSheet)
-	{
+
+	// ------------------------------------------------------| Add employee as a User |------------------------------------------------------
+	@PostMapping("/addEmployee")
+	public ResponseEntity<?> addEmployee(@Valid @RequestBody Employee employee) {
+		employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+		employee.setStatus("Inactive");
+		employee.setRole("ROLE_USER");
 		try {
-			return ResponseEntity.status(HttpStatus.CREATED).body(this.timeSheetService.addTimeSheet(timeSheet));
+			return ResponseEntity.status(HttpStatus.CREATED).body(this.employeeService.createEmployee(employee));
+//			return ResponseEntity.status(HttpStatus.CREATED).body(employee);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong !!!!!!!!");	
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Enter correct details !!");
 		}
 	}
-	
-	// ------------------------------------------------------| Update TimeSheet |------------------------------------------------------
-	@PatchMapping("/updateTimeSheet")
-	public ResponseEntity<?> updateTimeSheet(@RequestBody TimeSheet timeSheet) {
+
+	// ------------------------------------------------------| Update an employee |------------------------------------------------------
+	@PatchMapping("/updateEmployee")
+	public ResponseEntity<?> updateEmployee(@RequestBody Employee employee) {
 		try {
-			return ResponseEntity.status(HttpStatus.OK).body(this.timeSheetService.updateTimeSheet(timeSheet));
+			return ResponseEntity.status(HttpStatus.OK).body(this.employeeService.updateEmployee(employee));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(e.getMessage());
+		}
+	}
+
+	// ------------------------------------------------------| Read employees by status |------------------------------------------------------
+	@GetMapping("/getEmployeesByStatus/{status}")
+	public ResponseEntity<?> getEmployeesByStatus(@PathVariable("status") String Status) {
+		try {
+			return ResponseEntity.status(HttpStatus.OK).body(this.employeeService.getEmployeeByStatus(Status));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Something went wrong in server side !!!!!");
 		}
 	}
 	
-	// ------------------------------------------------------| View TimeSheets |------------------------------------------------------
-	@GetMapping("/readTimeSheets")
-	public ResponseEntity<?> readTimeSheets() {
+	// ------------------------------------------------------| Read employees by role |------------------------------------------------------
+	@GetMapping("/getEmployees")
+	public ResponseEntity<?> getEmployees() {
 		try {
-			return ResponseEntity.status(HttpStatus.OK).body(this.timeSheetService.readTimeSheet());
+			return ResponseEntity.status(HttpStatus.OK).body(this.employeeService.getUserEmployees("ROLE_USER"));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Something went wrong in server side !!!!!");
+				.body("Something went wrong in server side !!!!!");
 		}
 	}
-	
 }

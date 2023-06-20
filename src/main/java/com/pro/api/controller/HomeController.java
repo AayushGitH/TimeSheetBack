@@ -29,6 +29,8 @@ import com.pro.api.repo.HolidayRepo;
 import com.pro.api.service.EmployeeService;
 import com.pro.api.service.JwtService;
 
+import jakarta.validation.Valid;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/home")
@@ -61,7 +63,7 @@ public class HomeController
 	
 	// ------------------------------------------------------| Create employee |------------------------------------------------------
 	@PostMapping("/save")
-	public ResponseEntity<?> addEmployee(@RequestBody Employee employee)
+	public ResponseEntity<?> addEmployee(@Valid @RequestBody Employee employee)
 	{
 		employee.setPassword(passwordEncoder.encode(employee.getPassword()));
 		employee.setStatus("Active");
@@ -74,6 +76,7 @@ public class HomeController
 		} 
 		catch (Exception e) 
 		{
+			System.out.println(e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong in the server");
 		}
 	}

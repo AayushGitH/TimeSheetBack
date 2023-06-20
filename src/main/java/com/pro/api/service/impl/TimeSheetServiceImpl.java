@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.pro.api.entities.Employee;
 import com.pro.api.entities.TimeSheet;
+import com.pro.api.exceptions.ResourceNotFoundException;
 import com.pro.api.repo.EmployeeRepo;
 import com.pro.api.repo.TimeSheetRepo;
 import com.pro.api.service.TimeSheetService;
@@ -49,7 +50,7 @@ public class TimeSheetServiceImpl implements TimeSheetService
 	// Update TimeSheet
 	@Override
 	public TimeSheet updateTimeSheet(TimeSheet timeSheet) {
-		TimeSheet utimeSheet = this.timeSheetRepo.findById(timeSheet.getTimesheetId()).orElseThrow();
+		TimeSheet utimeSheet = this.timeSheetRepo.findById(timeSheet.getTimesheetId()).orElseThrow(() -> new ResourceNotFoundException("TimeSheet", "Id", timeSheet.getTimesheetId()));
 		timeSheet.setEmployee(utimeSheet.getEmployee());
 		return this.timeSheetRepo.save(timeSheet);
 	}
